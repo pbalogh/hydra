@@ -1480,6 +1480,37 @@ next constituent, then an IS tag, and finally the next word. The
 entire enriched stream is generated autoregressively; the model 
 has learned to produce both content and structure.
 
+\paragraph{Comparison with other models.}
+The continuation is structurally well-formed but semantically 
+independent of the prompt---consistent with the trajectory 
+dissociation discussed in Section~\ref{sec:discussion} and expected 
+for a model of this scale. To put this in context, here is the same 
+prompt processed by two comparison models:
+
+\begin{itemize}
+\item \textbf{GPT-2 Small} (124M parameters, $3\times$ larger, no 
+annotations): \emph{``I'm sorry, I'm sorry,'' she said. ``I'm sorry. 
+I'm sorry. I'm sorry. I'm sorry\ldots''} --- collapses into 
+repetition within 15 tokens despite having $3\times$ Hydra's 
+parameters.
+
+\item \textbf{ps-only Mamba} (39M parameters, same architecture, 
+phrase structure head only): generates a single word fragment 
+(\emph{``Saprang''}) then collapses into character-level repetition 
+(\emph{``ririririri\ldots''}) --- the fluency dissociation of 
+Table~\ref{tab:results}.
+\end{itemize}
+
+\noindent
+The three outputs illustrate three distinct failure modes: GPT-2 
+achieves fluency but not diversity (repetition collapse); ps-only 
+achieves neither (single-token dissociation); Hydra achieves both 
+fluency and structural diversity but not semantic coherence with the 
+prompt (trajectory dissociation). Each failure is a different 
+symptom of the same underlying challenge: navigating the meaning 
+manifold requires both knowing the coordinate system \emph{and} 
+learning to move through it purposefully.
+
 \paragraph{What the backbone does \emph{not} need to learn.}
 Without Hydra's heads, the backbone would need to spend layers 
 discovering that ``The cat'' is a noun phrase, that ``cat'' is the 
