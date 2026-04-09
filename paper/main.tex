@@ -1459,6 +1459,27 @@ the model produces the full enriched stream (including structural
 markup), and the output is decoded by extracting only the word 
 tokens, yielding plain text.
 
+To illustrate: given our example sentence as context, the model 
+generates (greedy decoding):
+
+\begin{quote}
+\small
+\emph{The first part of the first game features characters running 
+through\ldots}
+\end{quote}
+
+At each word position, the model's top predictions reflect 
+appropriate linguistic categories. At the determiner slot: 
+\texttt{The} $>$ \texttt{A} $>$ \texttt{an}. At the adjective 
+slot: \texttt{first} $>$ \texttt{large} $>$ \texttt{white}. At 
+the noun slot: \texttt{game} $>$ \texttt{day} $>$ \texttt{season}. 
+The model interleaves structural predictions between words---after 
+predicting a word, it next predicts the appropriate closing 
+brackets, then an opening bracket, then the POS label for the 
+next constituent, then an IS tag, and finally the next word. The 
+entire enriched stream is generated autoregressively; the model 
+has learned to produce both content and structure.
+
 \paragraph{What the backbone does \emph{not} need to learn.}
 Without Hydra's heads, the backbone would need to spend layers 
 discovering that ``The cat'' is a noun phrase, that ``cat'' is the 
