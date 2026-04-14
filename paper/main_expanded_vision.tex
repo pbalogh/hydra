@@ -212,11 +212,6 @@ selects a section of $F_{\text{syn}}$ where ``raced'' is the main verb
 transition to the reduced-relative reading. In Hydra, this transition is 
 \emph{visible}: the phrase-structure head and thematic head disagree at 
 the disambiguation point, producing a measurable signal of reanalysis.
-The severity of the garden-path effect depends on verb-specific argument 
-structure: verbs with strong transitive bias (e.g., \emph{examined}, 89\% 
-transitive usage) produce stronger misidentification than verbs with 
-weaker bias \cite{traxler2007lexical}, providing a concrete prediction 
-for which fiber transitions will be most costly.
 
 \paragraph{Modal reasoning as world-fiber navigation.}
 We propose associating the possible worlds of Kripkean semantics 
@@ -348,13 +343,6 @@ labels using dependency-based role mapping: \texttt{nsubj} $\to$ ARG0
 (agent), \texttt{dobj} $\to$ ARG1 (patient/theme), \texttt{iobj} $\to$ 
 ARG2 (recipient), with subtree propagation for multi-word arguments. 
 This head implements a section of $F_{\text{them}}$.
-The motivation for a dedicated thematic head is grounded in psycholinguistic 
-evidence that argument relations are \emph{lexically mediated}: syntactic 
-priming for reduced relative clauses is verb-specific (repeating the verb 
-\emph{examined} facilitates processing, but a different verb with the same 
-structure does not), suggesting that argument-structure information is stored 
-with individual lemmas rather than computed by general rules 
-\cite{traxler2007lexical}.
 
 \paragraph{Head 3: Information Structure.}
 Given/new tracking and topic/focus identification, using heuristic 
@@ -570,51 +558,6 @@ well-formed and semantically coherent, though occasionally unusual
 (``subspecies of females'')---consistent with a model that has learned 
 \emph{how} language is structured but is still developing \emph{what} 
 to say.
-
-\subsection{Baseline Comparison: Generation Quality}
-
-To contextualize these results, we compare Hydra's generation against 
-two baselines: a vanilla Mamba model with identical architecture 
-(39.3M parameters, $d=512$, 8 layers) trained on the same WikiText-103 
-text without any linguistic annotation, and GPT-2 Small (124.4M 
-parameters)---a model more than three times larger. All models use 
-greedy decoding from the prompt ``The cat sat on the mat.''
-
-\begin{table}[t]
-\centering
-\small
-\begin{tabular}{@{}p{2.2cm}rp{7cm}@{}}
-\toprule
-\textbf{Model} & \textbf{Params} & \textbf{Greedy continuation} \\
-\midrule
-GPT-2 Small & 124M & ``I'm sorry, I'm sorry,'' she said. ``I'm sorry. 
-I'm sorry. I'm sorry. I'm sorry. I'm sorry\ldots'' \\[4pt]
-Vanilla Mamba & 39M & \ldots found in the cat's cat, and the cat was 
-found in the cat's cat. The cat was found in the cat's cat\ldots \\[4pt]
-PS-only Mamba & 39M & Saprangapiriri\-ri\-ri\-ri\-ri\-ri\-ri\-ri\-ri\ldots 
-\emph{(single token then collapse)} \\[4pt]
-\textbf{Hydra} & \textbf{39M} & The first part of the first game features 
-characters running through\ldots \\
-\bottomrule
-\end{tabular}
-\caption{Greedy generation from the prompt ``The cat sat on the mat.'' 
-GPT-2 Small (3$\times$ more parameters) and vanilla Mamba (same 
-architecture, no linguistic heads) both collapse into degenerate 
-repetition. The PS-only model produces a single token then degenerates. 
-Only Hydra generates grammatically diverse, multi-clause text.}
-\label{tab:baseline-gen}
-\end{table}
-
-The vanilla Mamba baseline achieves a best validation perplexity of 47.3 
-on raw WikiText-103 tokens---compared to Hydra's word-level perplexity 
-of 2.9---but perplexity alone understates the qualitative gap. At 
-temperature 0.8, the vanilla model produces grammatical fragments 
-(``The cat sat on the black benthic terra''; ``The city of New York 
-was built to serve as a major airport, owning 350 passenger boats'') 
-that are locally coherent but globally incoherent: it generates 
-plausible-sounding phrases without structural control over what follows 
-what. Hydra's fiber annotations provide this control, yielding text 
-that maintains syntactic and discourse coherence across multiple clauses.
 
 \subsection{Phase 2: Full-Scale Training}
 
@@ -1048,23 +991,6 @@ our thematic head. Recent neural SRL models achieve high accuracy
 approximation for scalability, accepting some noise in exchange for 
 coverage of the full training corpus.
 
-\paragraph{Psycholinguistic evidence for multi-tier parsing.}
-Our multi-head design draws support from psycholinguistic research 
-distinguishing lexically mediated parsing from general processing 
-principles. \citet{traxler2007lexical} demonstrate that argument relations 
-(subject--verb--object bindings) are resolved via verb-specific structural 
-information: syntactic priming for reduced relative clauses requires 
-lexical overlap---repeating the structure alone is insufficient. By contrast, 
-PP attachment ambiguities are readily resolved by referential context, 
-suggesting a different, context-sensitive mechanism. This two-tier 
-architecture maps onto Hydra's design: the thematic head provides 
-lexically grounded argument structure (analogous to Traxler and Tooley's 
-lexically mediated tier), while the phrase structure and information 
-structure heads implement the general and discourse-sensitive tiers 
-respectively. Their finding that working memory span modulates sensitivity 
-to structural alternatives is also consistent with our channel-capacity 
-argument for why explicit fiber coordinates reduce processing load.
-
 \paragraph{Fiber bundles in NLP.}
 To our knowledge, the explicit use of fiber bundle geometry to model 
 linguistic structure is novel. Related geometric perspectives include 
@@ -1160,6 +1086,118 @@ the stronger this asymmetry becomes: each new fiber widens the gap
 between the SSM cost (linear in the number of new tokens) and the 
 transformer cost (quadratic). Hydra is, in this sense, an architecture 
 that \emph{could only have emerged} in the SSM era.
+
+\subsection{Fiber Tokens as Generalized Chain of Thought}
+
+Recent work on chain-of-thought (CoT) reasoning 
+\citep{wei2022chain,nye2021show} has demonstrated that injecting 
+intermediate reasoning tokens into the generation stream---even when 
+those tokens are not part of the final output---dramatically improves 
+model performance on complex tasks. We observe that Hydra's fiber 
+annotations are doing something structurally identical: injecting 
+explicit intermediate representations into the token stream to scaffold 
+a cognitive process. The difference is not architectural but dimensional. 
+CoT tags scaffold \emph{reasoning}; fiber tokens scaffold 
+\emph{linguistic structure, affect, and discourse}.
+
+This suggests a unifying view: all such injected tokens are 
+\emph{fibers}. A reasoning trace wrapped in \texttt{<think>} tags is 
+a reasoning fiber. A parse bracket \texttt{[PS:NP]} is a syntactic 
+fiber. A rhetorical plan marker \texttt{[PLAN:compare-then-contrast]} 
+would be a discourse fiber. An epistemic hedge 
+\texttt{[CONFIDENCE:uncertain]} would be a calibration fiber. The token 
+stream is a universal bus, and any dimension that aids downstream 
+generation can be made explicit on it.
+
+The SSM backbone makes this unification practical in a way that 
+transformers cannot support. Chain-of-thought in transformers is 
+\emph{expensive}: every thinking token inflates the quadratic attention 
+cost, which has spawned an active literature on compressing reasoning 
+traces, distilling long chains into short ones, and training models to 
+think in fewer tokens \citep{deng2024explicit,goyal2024think}. This 
+compression research exists precisely because transformers penalize 
+stream length. With an SSM backbone, the cost of verbosity is linear. 
+A model can simultaneously maintain reasoning tokens, linguistic fiber 
+tokens, tonal markers, and rhetorical plan tags---``thinking out loud'' 
+in multiple dimensions at once---without any fiber crowding out the 
+others.
+
+Moreover, Hydra already bridges the gap between \emph{pre-computed} 
+annotations (produced by external heads before inference) and 
+\emph{generated} annotations (produced by the model during 
+autoregressive generation, as in CoT). During generation, the Hydra 
+model produces both words and fiber tags autoregressively: it generates 
+its own parse brackets, its own information-structure markers, its own 
+structural scaffolding. Adding reasoning or planning tokens to the fiber 
+vocabulary would simply introduce another dimension that the model 
+learns to generate and consume in the same unified stream. The result 
+would be a model that simultaneously plans its rhetorical move, sets 
+its tonal register, scaffolds its syntax, and generates its words---all 
+as explicit, interpretable, editable tokens.
+
+This perspective extends beyond reasoning to what cognitive science 
+calls \emph{executive function}: the maintenance of goals, constraints, 
+and intentions that are temporally distant from the current token but 
+essential to discourse coherence. A fiber token such as 
+\texttt{[GOAL:build-toward-thesis-X]} represents goal maintenance; 
+\texttt{[CONSTRAINT:reader-lacks-Y]} encodes audience modeling; 
+\texttt{[CALLBACK:address-counterargument]} implements prospective 
+memory---the intention to do something later. These are ``temporally 
+inconvenient'' representations: they do not belong to any single token 
+but must persist across many. In a transformer, such persistence 
+requires the model to attend back to whichever earlier token established 
+the goal---an implicit, fragile mechanism that degrades with distance. 
+In an SSM, the recurrent state can carry forward-looking intentions 
+indefinitely; making them explicit fiber tokens further ensures they 
+are not merely carried but \emph{readable}, refreshable, and editable 
+at any point in the generation process.
+
+The resulting picture is of the token stream as a \emph{working memory 
+buffer} with multiple concurrent registers: syntactic structure, 
+semantic roles, tonal affect, rhetorical planning, and executive 
+intentions, all co-present as interpretable tokens, all available to 
+influence the next prediction, and all serializable for inspection or 
+resumption. This is, we suggest, a more natural computational model of 
+language production than the standard single-stream next-token 
+prediction, and one that the SSM's linear cost makes practical to explore.
+
+\paragraph{From annotation to computation.}
+The logic of fiber enrichment extends beyond passive annotation to 
+active computation. If the token stream can carry linguistic structure, 
+tonal affect, and executive intentions, it can also carry 
+\emph{knowledge} and \emph{queries}. A fact token such as 
+\texttt{[FACT:ice-nine(fictional, destroys-water)]} grounds generation 
+in retrieved knowledge---visible in the stream, auditable, editable. 
+More radically, a query token such as 
+\texttt{[QUERY:$\lambda x.\,\text{relevant}(x, \text{topic})$]} could 
+represent a structured retrieval request that an external knowledge 
+store executes mid-generation, with results re-injected as additional 
+fiber tokens. This transforms the token stream from a passive sequence 
+into a \emph{computation bus}: the model emits instructions alongside 
+words, external systems execute them, and results flow back into the 
+same stream that drives subsequent generation.
+
+This is tool use at the \emph{token level} rather than the API-call 
+level. Current tool-augmented language models interrupt generation, emit 
+a function call (typically as opaque JSON), wait for a response, and 
+resume. The fiber framework integrates this loop into the generation 
+stream itself: queries and results are fiber tokens with the same 
+interpretability guarantees as syntactic or tonal annotations. One can 
+inspect exactly what the model asked, what was returned, and how it 
+influenced the next word. If the query tokens are drawn from a 
+compositional formalism such as the lambda calculus 
+\citep{montague1973proper}, they combine in the same way that other 
+fiber tokens combine---the model need not context-switch between 
+``language mode'' and ``code mode'' because both are fibers on the 
+same stream.
+
+We do not claim to have implemented this vision, but we note that the 
+mathematical and computational infrastructure is already in place: the 
+fiber bundle framework provides the geometry, the SSM backbone provides 
+the linear-cost processing, and the tag-interleaving fusion mechanism 
+provides the interface. What remains is to train a model that learns 
+to emit, consume, and act on computational fiber tokens---a direction 
+we regard as among the most promising extensions of the Hydra framework.
 
 \subsection{Manifold Location Is Not Document-Level}
 
@@ -1311,6 +1349,48 @@ meaningful text at a parameter count where vanilla models cannot,
 it would constitute strong evidence that the path to efficient language 
 modeling runs through geometric explicitness rather than brute-force scale.
 
+\paragraph{Affective and prosodic fibers.}
+Our four heads cover syntax, semantics, and discourse---but written text 
+carries a further dimension that readers reconstruct implicitly: 
+\emph{tone}. Sarcasm, formality, humor, gravity, and register are 
+independent of parse structure (``That's just great'' has identical 
+constituency whether sincere or sardonic) and thus constitute a genuine 
+additional fiber. A tonal head could inject affect markers 
+(e.g., \texttt{[TONE:sardonic]}, \texttt{[TONE:elevated]}) into the 
+token stream, trained on emoji-rich social media where users 
+\emph{already annotate their own prosody} via emoji. Stripping 
+emoji from the text and predicting the original emoji cluster 
+provides a natural supervised signal.
+
+A related and perhaps more novel fiber is \emph{prosodic rhythm}: the 
+discourse-level pacing of sentences. Good prose alternates short 
+declarative sentences with long subordinate-clause-rich ones; legal 
+writing punches facts in staccato then buries qualifications in 
+baroque conditionals; stream-of-consciousness abandons conventional 
+sentence boundaries entirely. These patterns are structural but 
+operate \emph{above} the sentence level, in a dimension that no 
+standard NLP annotation captures. Yet they are trivially computable 
+from the surface text: sentence length in tokens, parse depth, 
+clause count, and deviation from the local running average. Custom 
+tokens such as \texttt{[LEN:short]}, \texttt{[RHYTHM:staccato]}, or 
+\texttt{[STRUCT:inverted]} would give the model explicit coordinates 
+for a dimension it would otherwise have to learn implicitly---or, at 
+small scale, never learn at all.
+
+More broadly, any extraneous metadata about a corpus---genre labels, 
+publication venue, authorship, era---can be injected as additional 
+fiber tokens. A sentence known to originate from a legal brief or 
+a medical journal carries register information that need not be 
+inferred from the words alone. The Hydra framework is not limited to 
+linguistically \emph{standard} annotation schemes: any computable or 
+known property of text defines a potential fiber. At generation time, 
+a fusion layer can selectively strip or retain these tokens depending 
+on the target venue, allowing the model to \emph{always reason with} 
+tonal, rhythmic, and register information while \emph{optionally 
+surfacing} it in the output. The fiber bundle framework accommodates 
+this naturally: each new metadata source defines a new fiber, and 
+the structure group determines how fibers interact during generation.
+
 % ============================================================
 \section{Conclusion}
 \label{sec:conclusion}
@@ -1360,10 +1440,7 @@ grounded in fiber bundle geometry. Our key contributions are:
 These results suggest that the path to better language models runs not 
 only through scale but through \emph{geometric explicitness}: telling the 
 model where it is on the meaning manifold, rather than forcing it to 
-discover its location from scratch at every forward pass. We believe the 
-fiber framework extends naturally beyond linguistic annotation to 
-encompass affect, reasoning, and active knowledge retrieval---directions 
-we explore in forthcoming work.
+discover its location from scratch at every forward pass.
 
 \bibliographystyle{plainnat}
 \bibliography{references}
